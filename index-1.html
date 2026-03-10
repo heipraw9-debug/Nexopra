@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="theme-color" content="#07090d"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="NexorAI"/>
+<link rel="manifest" id="pwa-manifest"/>
+<title>NexorAI</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+:root{
+  --bg:#07090d;--bg2:#0d1117;--bg3:#111620;
+  --glass:rgba(255,255,255,0.04);--glass-b:rgba(255,255,255,0.08);
+  --cyan:#00f5d4;--cyan-dim:rgba(0,245,212,0.14);--cyan-glow:rgba(0,245,212,0.28);--cyan-deep:rgba(0,245,212,0.055);
+  --violet:#7c6bff;--violet-dim:rgba(124,107,255,0.15);
+  --user-bg:rgba(0,245,212,0.07);--user-b:rgba(0,245,212,0.2);
+  --ai-bg:rgba(255,255,255,0.035);--ai-b:rgba(255,255,255,0.07);
+  --txt:#e4eaf0;--txt2:#7d8a96;--txt3:#35404a;
+  --err:#ff5370;--warn:#ffb454;--green:#00e676;
+  --r:18px;--r-sm:11px;--r-xs:6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%}
+body{height:100%;min-height:100dvh;background:var(--bg);color:var(--txt);font-family:'Outfit',sans-serif;font-size:15px;overflow:hidden;-webkit-font-smoothing:antialiased;}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 55% at 8% 18%,rgba(0,245,212,0.055) 0%,transparent 65%),
+  radial-gradient(ellipse 55% 45% at 92% 82%,rgba(124,107,255,0.07) 0%,transparent 60%),
+  radial-gradient(ellipse 40% 35% at 50% 50%,rgba(0,245,212,0.025) 0%,transparent 70%);
+  animation:bgPulse 14s ease-in-out infinite alternate;}
+@keyframes bgPulse{0%{opacity:.7;transform:scale(1)}100%{opacity:1;transform:scale(1.04)}}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,0.013) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.013) 1px,transparent 1px);
+  background-size:46px 46px;}
+
+/* ═══ LOGIN ═══ */
+#login-screen{position:fixed;inset:0;z-index:900;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeUp .5s ease both;}
+#login-screen.out{animation:lOut .38s forwards;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes lOut{to{opacity:0;transform:scale(1.04)}}
+.lcard{position:relative;z-index:1;width:100%;max-width:430px;background:rgba(10,15,21,0.9);border:1px solid var(--glass-b);border-radius:26px;padding:44px 38px 36px;backdrop-filter:blur(36px);
+  box-shadow:0 0 0 1px rgba(255,255,255,0.03),0 28px 72px rgba(0,0,0,0.65),0 0 60px var(--cyan-dim),inset 0 1px 0 rgba(255,255,255,0.055);
+  animation:cardIn .55s cubic-bezier(.16,1,.3,1) both;}
+@keyframes cardIn{from{opacity:0;transform:translateY(26px) scale(.96)}to{opacity:1;transform:none}}
+.lcard::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.55;border-radius:50%;}
+.lbrand{display:flex;align-items:center;gap:14px;margin-bottom:28px;}
+.lbrand-icon{width:50px;height:50px;border-radius:15px;flex-shrink:0;background:linear-gradient(135deg,rgba(0,245,212,.14),rgba(0,245,212,.04));border:1px solid rgba(0,245,212,.28);display:flex;align-items:center;justify-content:center;box-shadow:0 0 22px var(--cyan-dim);}
+.lbrand-icon svg{width:26px;height:26px;}
+.lbrand-name{font-size:1.55rem;font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.lbrand-sub{font-size:.66rem;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;margin-top:2px;}
+.ltitle{font-size:1rem;font-weight:700;margin-bottom:5px;}
+.ldesc{font-size:.8rem;color:var(--txt2);margin-bottom:22px;line-height:1.6;}
+.flabel{display:block;font-size:.7rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--txt2);margin-bottom:7px;}
+.pw-wrap{position:relative;margin-bottom:5px;}
+#lpw{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--glass-b);border-radius:var(--r-sm);color:var(--txt);font-family:'Fira Code',monospace;font-size:.9rem;padding:14px 48px 14px 18px;outline:none;letter-spacing:.07em;transition:all .2s;}
+#lpw:focus{border-color:rgba(0,245,212,.38);background:rgba(0,245,212,.025);box-shadow:0 0 0 3px rgba(0,245,212,.07);}
+#lpw.shake{animation:shake .38s ease;border-color:rgba(255,83,112,.48)!important;}
+@keyframes shake{0%,100%{transform:translateX(0)}18%{transform:translateX(-9px)}36%{transform:translateX(9px)}54%{transform:translateX(-5px)}72%{transform:translateX(5px)}}
+.pw-eye{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--txt3);padding:4px;display:flex;transition:color .18s;}
+.pw-eye:hover{color:var(--cyan);}
+.lerr{min-height:20px;margin-bottom:14px;font-size:.74rem;color:var(--err);display:flex;align-items:center;gap:5px;opacity:0;transition:opacity .18s;}
+.lerr.show{opacity:1;}
+.btn-login{width:100%;height:50px;background:linear-gradient(135deg,var(--cyan),#00c8aa);border:none;border-radius:var(--r-sm);color:#021a14;font-family:'Outfit',sans-serif;font-size:.86rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 28px var(--cyan-dim);transition:all .2s;}
+.btn-login:hover{transform:translateY(-2px);box-shadow:0 8px 38px var(--cyan-glow);}
+.lfoot{margin-top:18px;text-align:center;font-size:.62rem;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;}
+
+/* ═══ APP LAYOUT ═══ */
+#app{position:relative;z-index:1;display:flex;flex-direction:column;height:100dvh;max-width:920px;margin:0 auto;}
+
+/* ═══ HEADER ═══ */
+header{display:flex;align-items:center;gap:10px;padding:11px 18px;background:rgba(7,9,13,.8);backdrop-filter:blur(28px);border-bottom:1px solid var(--glass-b);flex-shrink:0;position:relative;}
+header::after{content:'';position:absolute;bottom:0;left:6%;right:6%;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.3;animation:hdrLine 6s ease-in-out infinite;}
+@keyframes hdrLine{0%,100%{opacity:.15;transform:scaleX(.5)}50%{opacity:.4;transform:scaleX(1)}}
+.hd-icon{width:36px;height:36px;border-radius:11px;flex-shrink:0;background:linear-gradient(135deg,rgba(0,245,212,.16),rgba(0,245,212,.05));border:1px solid rgba(0,245,212,.24);display:flex;align-items:center;justify-content:center;box-shadow:0 0 14px var(--cyan-dim);}
+.hd-icon svg{width:19px;height:19px;}
+.hd-name{font-size:1rem;font-weight:800;background:linear-gradient(135deg,#fff 35%,var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hd-ver{font-size:.6rem;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;}
+.hd-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.hd-status{display:flex;align-items:center;gap:6px;font-size:.65rem;color:var(--txt2);}
+.pip{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 7px var(--cyan);animation:pip 2.6s ease-in-out infinite;}
+@keyframes pip{0%,100%{opacity:1}50%{opacity:.28}}
+
+/* Persona selector */
+.persona-btn{background:var(--glass);border:1px solid var(--glass-b);border-radius:8px;color:var(--txt2);font-size:.68rem;font-weight:600;padding:5px 10px;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:4px;}
+.persona-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+
+/* History & Export buttons */
+.hd-action{width:30px;height:30px;background:var(--glass);border:1px solid var(--glass-b);border-radius:8px;color:var(--txt2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;}
+.hd-action:hover{border-color:var(--cyan);color:var(--cyan);}
+.hd-action svg{width:14px;height:14px;}
+
+/* ═══ PERSONA MODAL ═══ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:800;display:flex;align-items:flex-end;justify-content:center;padding:20px;animation:fadeIn .2s ease;}
+.modal-overlay.hide{animation:fadeOut .2s ease forwards;}
+@keyframes fadeOut{to{opacity:0}}
+.modal-box{background:var(--bg3);border:1px solid var(--glass-b);border-radius:22px 22px 18px 18px;width:100%;max-width:500px;padding:24px;box-shadow:0 -20px 60px rgba(0,0,0,0.5);animation:slideUp2 .3s cubic-bezier(.16,1,.3,1);}
+@keyframes slideUp2{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.modal-title{font-size:.9rem;font-weight:700;margin-bottom:16px;color:var(--txt2);letter-spacing:.06em;text-transform:uppercase;}
+.persona-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.persona-card{background:var(--glass);border:1px solid var(--glass-b);border-radius:14px;padding:14px;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;gap:6px;}
+.persona-card:hover,.persona-card.active{border-color:var(--cyan);background:var(--cyan-deep);}
+.persona-card.active{box-shadow:0 0 16px var(--cyan-dim);}
+.persona-emoji{font-size:1.5rem;}
+.persona-name{font-size:.82rem;font-weight:700;color:var(--txt);}
+.persona-desc{font-size:.7rem;color:var(--txt2);line-height:1.4;}
+.modal-close{width:100%;margin-top:14px;padding:12px;background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--r-sm);color:var(--txt2);font-family:'Outfit',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .18s;}
+.modal-close:hover{border-color:var(--err);color:var(--err);}
+
+/* ═══ HISTORY PANEL ═══ */
+.history-panel{position:fixed;top:0;right:0;width:min(300px,85vw);height:100dvh;background:rgba(10,14,20,0.95);backdrop-filter:blur(24px);border-left:1px solid var(--glass-b);z-index:700;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.16,1,.3,1);}
+.history-panel.open{transform:translateX(0);}
+.hp-header{padding:18px 16px 14px;border-bottom:1px solid var(--glass-b);display:flex;align-items:center;justify-content:space-between;}
+.hp-title{font-size:.88rem;font-weight:700;color:var(--txt);}
+.hp-close{background:none;border:none;color:var(--txt2);cursor:pointer;font-size:1.2rem;}
+.hp-list{flex:1;overflow-y:auto;padding:10px;}
+.hp-item{padding:10px 12px;border-radius:10px;cursor:pointer;margin-bottom:6px;border:1px solid transparent;transition:all .18s;}
+.hp-item:hover{background:var(--glass);border-color:var(--glass-b);}
+.hp-item.active{background:var(--cyan-deep);border-color:rgba(0,245,212,.25);}
+.hp-item-title{font-size:.78rem;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hp-item-time{font-size:.65rem;color:var(--txt3);margin-top:3px;}
+.hp-new{margin:10px;padding:12px;background:linear-gradient(135deg,var(--cyan),#00c8aa);border:none;border-radius:var(--r-sm);color:#021a14;font-family:'Outfit',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;width:calc(100% - 20px);transition:all .18s;}
+.hp-new:hover{box-shadow:0 4px 20px var(--cyan-glow);}
+.hp-empty{padding:30px 16px;text-align:center;color:var(--txt3);font-size:.78rem;}
+
+/* ═══ CHAT BOX ═══ */
+#chat-box{flex:1;overflow-y:auto;padding:22px 18px;display:flex;flex-direction:column;gap:16px;scroll-behavior:smooth;}
+#chat-box::-webkit-scrollbar{width:3px;}
+#chat-box::-webkit-scrollbar-thumb{background:#1c2530;border-radius:4px;}
+#empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;pointer-events:none;text-align:center;animation:fadeIn .5s ease;}
+.empty-icon{width:68px;height:68px;border-radius:22px;background:var(--glass);border:1px solid var(--glass-b);display:flex;align-items:center;justify-content:center;box-shadow:0 0 38px var(--cyan-deep);}
+.empty-icon svg{width:34px;height:34px;}
+#empty h3{font-size:.95rem;font-weight:700;color:var(--txt3);}
+#empty p{font-size:.72rem;color:var(--txt3);max-width:240px;line-height:1.65;}
+
+/* Quick suggestions */
+.suggestions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:6px;}
+.sug-btn{background:var(--glass);border:1px solid var(--glass-b);border-radius:20px;color:var(--txt2);font-size:.72rem;padding:6px 14px;cursor:pointer;transition:all .18s;pointer-events:all;}
+.sug-btn:hover{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-deep);}
+
+/* ═══ MESSAGES ═══ */
+.msg{display:flex;gap:10px;animation:msgIn .3s cubic-bezier(.16,1,.3,1) both;}
+@keyframes msgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.msg.user{flex-direction:row-reverse;}
+.av{width:32px;height:32px;border-radius:10px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;}
+.msg.user .av{background:linear-gradient(135deg,rgba(0,245,212,.2),rgba(0,245,212,.07));border:1px solid rgba(0,245,212,.28);color:var(--cyan);box-shadow:0 0 10px var(--cyan-dim);}
+.msg.ai .av{background:var(--glass);border:1px solid var(--glass-b);color:var(--txt2);}
+.mcol{display:flex;flex-direction:column;max-width:min(78%,600px);}
+.msg.user .mcol{align-items:flex-end;}
+.bubble{padding:12px 16px;border-radius:var(--r);line-height:1.74;font-size:.875rem;word-break:break-word;backdrop-filter:blur(12px);}
+.msg.user .bubble{background:var(--user-bg);border:1px solid var(--user-b);border-top-right-radius:4px;color:#d5fff8;box-shadow:0 0 24px rgba(0,245,212,.05);}
+.msg.ai .bubble{background:var(--ai-bg);border:1px solid var(--ai-b);border-top-left-radius:4px;box-shadow:0 4px 20px rgba(0,0,0,.2);}
+.bubble.errb{border-color:rgba(255,83,112,.3);background:rgba(255,83,112,.06);color:#ff8fa0;}
+
+/* msg actions */
+.msg-actions{display:flex;gap:6px;margin-top:5px;opacity:0;transition:opacity .2s;}
+.msg:hover .msg-actions{opacity:1;}
+.ma-btn{background:none;border:1px solid var(--glass-b);border-radius:6px;color:var(--txt3);font-size:.62rem;padding:2px 8px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:3px;}
+.ma-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+.ma-btn svg{width:10px;height:10px;}
+.ts{font-size:.6rem;color:var(--txt3);margin-top:4px;padding:0 3px;}
+.msg.user .ts{text-align:right;}
+
+/* ═══ MARKDOWN ═══ */
+.mdb{line-height:1.76;}
+.mdb p{margin:0 0 .6em;}.mdb p:last-child{margin-bottom:0;}
+.mdb h1,.mdb h2,.mdb h3{font-family:'Outfit',sans-serif;font-weight:700;margin:.8em 0 .35em;color:#fff;}
+.mdb h1{font-size:1.18em;}.mdb h2{font-size:1.05em;}.mdb h3{font-size:.96em;}
+.mdb ul,.mdb ol{padding-left:1.3em;margin:.4em 0;}.mdb li{margin:.2em 0;}
+.mdb a{color:var(--cyan);text-decoration:none;border-bottom:1px solid var(--cyan-dim);}
+.mdb strong{font-weight:700;color:#fff;}.mdb em{color:#c0d0de;font-style:italic;}
+.mdb hr{border:none;border-top:1px solid var(--glass-b);margin:.8em 0;}
+.mdb blockquote{border-left:3px solid var(--cyan);margin:.6em 0;padding:4px 12px;background:var(--cyan-deep);border-radius:0 var(--r-xs) var(--r-xs) 0;color:var(--txt2);font-style:italic;}
+.mdb table{width:100%;border-collapse:collapse;margin:.6em 0;font-size:.83em;}
+.mdb th,.mdb td{border:1px solid var(--glass-b);padding:6px 10px;text-align:left;}
+.mdb th{background:rgba(0,245,212,.06);font-weight:600;color:var(--cyan);}
+.mdb tr:nth-child(even){background:rgba(255,255,255,.02);}
+.mdb code:not(pre code){font-family:'Fira Code',monospace;font-size:.82em;background:rgba(0,245,212,.1);border:1px solid rgba(0,245,212,.2);border-radius:5px;padding:2px 6px;color:var(--cyan);}
+.cbwrap{margin:.7em 0;border-radius:var(--r-sm);overflow:hidden;border:1px solid rgba(255,255,255,.07);background:#0d1117;}
+.cbhead{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.055);}
+.cblang{font-family:'Fira Code',monospace;font-size:.65rem;font-weight:500;color:var(--cyan);letter-spacing:.09em;text-transform:uppercase;}
+.cpbtn{font-family:'Outfit',sans-serif;font-size:.65rem;font-weight:600;background:none;border:1px solid var(--glass-b);border-radius:var(--r-xs);color:var(--txt2);padding:2px 9px;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:4px;}
+.cpbtn:hover{border-color:var(--cyan);color:var(--cyan);}
+.cbwrap pre{margin:0;padding:14px;overflow-x:auto;font-size:.8rem;background:transparent!important;}
+.cbwrap pre code{font-family:'Fira Code',monospace!important;background:none!important;padding:0;border:none!important;color:inherit;}
+
+/* ═══ IMAGE ═══ */
+.bubble img{max-width:100%;border-radius:var(--r-sm);display:block;margin-top:4px;border:1px solid var(--glass-b);box-shadow:0 8px 30px rgba(0,0,0,.4);cursor:zoom-in;transition:transform .2s;}
+.bubble img:hover{transform:scale(1.012);}
+.img-styles{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+.style-pill{background:var(--glass);border:1px solid var(--glass-b);border-radius:20px;color:var(--txt2);font-size:.68rem;padding:5px 12px;cursor:pointer;transition:all .15s;}
+.style-pill:hover,.style-pill.active{border-color:var(--violet);color:var(--violet);background:var(--violet-dim);}
+.dl-btn{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:7px 14px;background:rgba(0,245,212,.07);border:1px solid rgba(0,245,212,.24);border-radius:var(--r-sm);color:var(--cyan);font-family:'Outfit',sans-serif;font-size:.72rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;transition:all .18s;}
+.dl-btn:hover{background:rgba(0,245,212,.14);border-color:var(--cyan);transform:translateY(-1px);}
+.dl-btn svg{width:12px;height:12px;}
+
+/* ═══ ATTACH PREVIEW ═══ */
+.attach-preview{display:flex;align-items:center;gap:8px;padding:7px 11px;background:rgba(0,245,212,.055);border:1px solid rgba(0,245,212,.18);border-radius:var(--r-sm);margin-bottom:7px;font-size:.76rem;color:var(--cyan);}
+.attach-preview img{width:36px;height:36px;object-fit:cover;border-radius:6px;}
+.attach-preview .fname{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--txt2);}
+.rm-btn{background:none;border:none;color:var(--txt3);cursor:pointer;font-size:.9rem;padding:2px 5px;border-radius:4px;transition:color .15s;}
+.rm-btn:hover{color:var(--err);}
+.link-bar{display:flex;align-items:center;gap:8px;padding:7px 11px;background:rgba(124,107,255,.07);border:1px solid rgba(124,107,255,.22);border-radius:var(--r-sm);margin-bottom:7px;}
+.link-bar span{flex:1;font-size:.74rem;color:var(--violet);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* ═══ LOADING ═══ */
+.ldbub{display:flex;align-items:center;gap:10px;padding:10px 15px;}
+.lddots{display:flex;gap:5px;}
+.lddots span{width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:ldB 1.3s ease-in-out infinite;}
+.lddots span:nth-child(2){animation-delay:.18s;}.lddots span:nth-child(3){animation-delay:.36s;}
+@keyframes ldB{0%,80%,100%{transform:scale(.5);opacity:.3}40%{transform:scale(1);opacity:1}}
+.ldtxt{font-size:.75rem;color:var(--txt2);}
+
+/* ═══ TTS / Voice ═══ */
+.tts-btn{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:none;border:1px solid var(--glass-b);border-radius:6px;color:var(--txt3);font-size:.62rem;cursor:pointer;transition:all .15s;margin-top:5px;}
+.tts-btn:hover{border-color:var(--violet);color:var(--violet);}
+.tts-btn.playing{border-color:var(--cyan);color:var(--cyan);animation:pip 1s infinite;}
+
+/* ═══ RATE LIMIT WARNING ═══ */
+.rate-warn{display:none;text-align:center;font-size:.7rem;color:var(--warn);padding:4px;margin-top:4px;}
+.rate-warn.show{display:block;}
+
+/* ═══ INPUT AREA - CLEAN ═══ */
+#input-area{padding:10px 14px 14px;background:rgba(7,9,13,.88);backdrop-filter:blur(28px);border-top:1px solid var(--glass-b);flex-shrink:0;}
+#rate-warn{display:none;font-size:.68rem;color:var(--warn);margin-bottom:6px;text-align:center;}
+#rate-warn.show{display:block;}
+
+.input-row{display:flex;align-items:flex-end;gap:8px;}
+
+/* Plus button */
+.plus-btn{width:38px;height:38px;flex-shrink:0;border-radius:50%;background:var(--glass);border:1px solid var(--glass-b);color:var(--txt2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .22s;}
+.plus-btn:hover,.plus-btn.open{background:var(--cyan-deep);border-color:rgba(0,245,212,.35);color:var(--cyan);}
+.plus-btn.open #plus-icon{transform:rotate(45deg);}
+#plus-icon{transition:transform .22s;}
+
+/* Textarea shell */
+.input-shell{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--glass-b);border-radius:20px;padding:9px 14px;transition:border-color .2s,box-shadow .2s;min-height:38px;display:flex;align-items:center;}
+.input-shell:focus-within{border-color:rgba(0,245,212,.3);box-shadow:0 0 0 3px rgba(0,245,212,.05);}
+#ui{background:transparent;border:none;outline:none;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.9rem;line-height:1.5;resize:none;min-height:20px;max-height:110px;width:100%;}
+#ui::placeholder{color:var(--txt3);}
+#ui:disabled{opacity:.3;cursor:not-allowed;}
+
+/* Voice inline */
+.voice-inline-btn{width:38px;height:38px;flex-shrink:0;border-radius:50%;background:var(--glass);border:1px solid var(--glass-b);color:var(--txt2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.voice-inline-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+#voice-btn.recording{border-color:var(--err)!important;color:var(--err)!important;background:rgba(255,83,112,.12)!important;animation:pulse-rec .8s ease-in-out infinite;}
+@keyframes pulse-rec{0%,100%{box-shadow:0 0 0 0 rgba(255,83,112,.4)}50%{box-shadow:0 0 0 6px rgba(255,83,112,0)}}
+
+/* Send button */
+.send-btn{width:38px;height:38px;flex-shrink:0;border-radius:50%;background:linear-gradient(135deg,var(--cyan),#00c8aa);border:none;color:#021a14;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 16px var(--cyan-dim);transition:all .2s;}
+.send-btn:hover{transform:scale(1.08);box-shadow:0 5px 24px var(--cyan-glow);}
+.send-btn:disabled{opacity:.3;cursor:not-allowed;transform:none;}
+
+/* Plus popup menu */
+.plus-menu-popup{position:fixed;bottom:80px;left:14px;right:14px;max-width:420px;background:rgba(12,16,24,0.97);border:1px solid var(--glass-b);border-radius:20px;padding:16px;backdrop-filter:blur(32px);box-shadow:0 -8px 40px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.03);z-index:600;transform:translateY(16px) scale(.97);opacity:0;pointer-events:none;transition:all .22s cubic-bezier(.16,1,.3,1);}
+.plus-menu-popup.open{transform:none;opacity:1;pointer-events:all;}
+#plus-overlay{position:fixed;inset:0;z-index:599;display:none;}
+#plus-overlay.show{display:block;}
+
+.pm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.pm-item{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--glass);border:1px solid var(--glass-b);border-radius:14px;padding:12px 6px 10px;cursor:pointer;transition:all .18s;font-family:'Outfit',sans-serif;}
+.pm-item:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.12);transform:translateY(-2px);}
+.pm-icon{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,.06);border:1px solid var(--glass-b);display:flex;align-items:center;justify-content:center;color:var(--txt2);}
+.pm-icon svg{width:17px;height:17px;}
+.pm-icon.pm-cyan{background:rgba(0,245,212,.1);border-color:rgba(0,245,212,.25);color:var(--cyan);}
+.pm-icon.pm-violet{background:rgba(124,107,255,.1);border-color:rgba(124,107,255,.25);color:var(--violet);}
+.pm-item span{font-size:.65rem;font-weight:600;color:var(--txt3);letter-spacing:.03em;}
+
+/* ═══ TYPEWRITER CURSOR ═══ */
+.typing-cursor::after{content:'▋';color:var(--cyan);animation:blink .7s step-end infinite;margin-left:2px;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ═══ PROMPT TEMPLATES ═══ */
+#templates-bar{display:none;gap:6px;padding:4px 0 2px;overflow-x:auto;scrollbar-width:none;}
+#templates-bar::-webkit-scrollbar{display:none;}
+#templates-bar.show{display:flex;}
+.tpl-pill{flex-shrink:0;background:var(--glass);border:1px solid var(--glass-b);border-radius:16px;color:var(--txt2);font-size:.7rem;font-weight:500;padding:5px 12px;cursor:pointer;transition:all .18s;white-space:nowrap;}
+.tpl-pill:hover{border-color:var(--violet);color:var(--violet);background:var(--violet-dim);}
+
+/* ═══ REACTIONS ═══ */
+.react-bar{display:flex;gap:5px;margin-top:5px;align-items:center;}
+.react-btn{background:none;border:1px solid var(--glass-b);border-radius:20px;padding:3px 9px;font-size:.72rem;cursor:pointer;color:var(--txt3);transition:all .18s;display:flex;align-items:center;gap:3px;}
+.react-btn:hover{background:var(--glass);border-color:var(--glass-b);transform:scale(1.1);}
+.react-btn.reacted{border-color:rgba(0,245,212,.35);background:var(--cyan-deep);color:var(--cyan);}
+.react-count{font-size:.65rem;color:var(--txt3);}
+
+/* ═══ STATS CHIP ═══ */
+.stats-chip{display:flex;align-items:center;gap:5px;background:var(--glass);border:1px solid var(--glass-b);border-radius:8px;padding:4px 9px;font-size:.62rem;color:var(--txt3);cursor:pointer;transition:all .18s;}
+.stats-chip:hover{border-color:var(--cyan);color:var(--cyan);}
+.stats-chip svg{width:11px;height:11px;}
+
+/* ═══ STATS MODAL ═══ */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;}
+.stat-card{background:var(--glass);border:1px solid var(--glass-b);border-radius:12px;padding:14px;text-align:center;}
+.stat-num{font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,var(--cyan),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.stat-label{font-size:.65rem;color:var(--txt3);margin-top:3px;letter-spacing:.06em;text-transform:uppercase;}
+
+/* PWA install banner */
+#install-banner{display:none;align-items:center;justify-content:space-between;gap:10px;padding:8px 14px;background:linear-gradient(135deg,rgba(0,245,212,.1),rgba(124,107,255,.1));border-bottom:1px solid rgba(0,245,212,.2);font-size:.75rem;color:var(--txt);}
+#install-banner.show{display:flex;}
+#install-banner button{background:var(--cyan);border:none;border-radius:7px;color:#021a14;font-family:'Outfit',sans-serif;font-size:.7rem;font-weight:700;padding:5px 12px;cursor:pointer;}
+#install-banner .ib-close{background:none;border:none;color:var(--txt3);font-size:1rem;cursor:pointer;padding:2px 6px;}
+
+#file-input,#img-input{display:none;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+@media(max-width:560px){
+  .lcard{padding:30px 20px 24px;}
+  #chat-box{padding:14px 11px;}
+  .bubble{font-size:.82rem;}
+  .sbtn{height:30px;padding:0 10px;font-size:.67rem;}
+  #input-area{padding:9px 11px 11px;}
+  header{padding:10px 13px;}
+/* ═══ VOICE SELECTOR MODAL ═══ */
+.voice-modal-box{max-height:80dvh;display:flex;flex-direction:column;}
+.vm-search{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--glass-b);border-radius:10px;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.82rem;padding:9px 13px;outline:none;margin-bottom:10px;}
+.vm-search:focus{border-color:rgba(0,245,212,.3);}
+.vm-langs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.vm-lang-btn{background:var(--glass);border:1px solid var(--glass-b);border-radius:14px;color:var(--txt3);font-size:.65rem;font-weight:600;padding:4px 10px;cursor:pointer;transition:all .15s;}
+.vm-lang-btn:hover,.vm-lang-btn.active{background:var(--cyan-deep);border-color:rgba(0,245,212,.3);color:var(--cyan);}
+.vm-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;max-height:50dvh;}
+.vm-list::-webkit-scrollbar{width:3px;}
+.vm-list::-webkit-scrollbar-thumb{background:#1c2530;border-radius:4px;}
+.vm-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--glass);border:1px solid var(--glass-b);border-radius:12px;cursor:pointer;transition:all .18s;}
+.vm-item:hover{background:rgba(255,255,255,.07);border-color:var(--glass-b);}
+.vm-item.selected{background:var(--cyan-deep);border-color:rgba(0,245,212,.3);}
+.vm-flag{font-size:1.3rem;flex-shrink:0;}
+.vm-info{flex:1;min-width:0;}
+.vm-name{font-size:.8rem;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.vm-lang{font-size:.64rem;color:var(--txt3);margin-top:1px;}
+.vm-preview{background:none;border:1px solid var(--glass-b);border-radius:6px;color:var(--txt3);font-size:.65rem;padding:4px 8px;cursor:pointer;flex-shrink:0;transition:all .15s;}
+.vm-preview:hover{border-color:var(--cyan);color:var(--cyan);}
+.vm-empty{text-align:center;color:var(--txt3);font-size:.78rem;padding:20px;}
+.vm-speed{display:flex;align-items:center;gap:10px;padding:10px 0 4px;border-top:1px solid var(--glass-b);margin-top:8px;}
+.vm-speed-label{font-size:.68rem;color:var(--txt3);white-space:nowrap;}
+.vm-speed input{flex:1;accent-color:var(--cyan);}
+.vm-speed-val{font-size:.7rem;color:var(--cyan);font-weight:600;min-width:32px;text-align:right;}
+
+  .hd-ver,.hd-status span{display:none;}
+}
+</style>
+</head>
+<body>
+
+<input type="file" id="file-input" accept=".txt,.pdf,.csv,.json,.md,.py,.js,.html,.css"/>
+<input type="file" id="img-input" accept="image/*" capture="environment"/>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="lcard">
+    <div class="lbrand">
+      <div class="lbrand-icon">
+        <svg viewBox="0 0 40 40" fill="none"><path d="M20 3L35 11.5V28.5L20 37L5 28.5V11.5L20 3Z" stroke="#00f5d4" stroke-width="1.4" opacity=".5"/><circle cx="20" cy="20" r="4.5" fill="#00f5d4"/><line x1="20" y1="3" x2="20" y2="15.5" stroke="#00f5d4" stroke-width="1.2" opacity=".55"/><line x1="20" y1="24.5" x2="20" y2="37" stroke="#00f5d4" stroke-width="1.2" opacity=".55"/><line x1="5" y1="11.5" x2="15.5" y2="17.5" stroke="#00f5d4" stroke-width="1.2" opacity=".55"/><line x1="24.5" y1="22.5" x2="35" y2="28.5" stroke="#00f5d4" stroke-width="1.2" opacity=".55"/><line x1="35" y1="11.5" x2="24.5" y2="17.5" stroke="#00f5d4" stroke-width="1.2" opacity=".55"/><line x1="15.5" y1="22.5" x2="5" y2="28.5" stroke="#00f5d4" stroke-width="1.2" opacity=".55"/></svg>
+      </div>
+      <div><div class="lbrand-name">NexorAI</div><div class="lbrand-sub">Ultimate v5.0</div></div>
+    </div>
+    <p class="ltitle">Secure Access Required</p>
+    <p class="ldesc">Enter your session password to initialise NexorAI Ultimate.</p>
+    <label class="flabel" for="lpw">Session Password</label>
+    <div class="pw-wrap">
+      <input type="password" id="lpw" placeholder="••••••••••••" autocomplete="current-password"/>
+      <button class="pw-eye" onclick="togglePw()" tabindex="-1" type="button">
+        <svg id="eye-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+    <div class="lerr" id="lerr"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span id="errtxt">Incorrect password.</span></div>
+    <button class="btn-login" onclick="doLogin()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Unlock NexorAI
+    </button>
+    <p class="lfoot">End-to-End Encrypted · NexorAI Ultimate 2026</p>
+  </div>
+</div>
+
+<!-- PERSONA MODAL -->
+<div id="persona-modal" style="display:none;">
+  <div class="modal-overlay" onclick="closePersona(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-title">🎭 AI Persona Choose Karo</div>
+      <div class="persona-grid" id="persona-grid"></div>
+      <button class="modal-close" onclick="closePersona()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY PANEL -->
+<div class="history-panel" id="history-panel">
+  <div class="hp-header">
+    <span class="hp-title">💬 Chat History</span>
+    <button class="hp-close" onclick="toggleHistory()">✕</button>
+  </div>
+  <div class="hp-list" id="hp-list"></div>
+  <button class="hp-new" onclick="newChat()">+ New Chat</button>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <!-- PWA Install Banner -->
+  <div id="install-banner">
+    <span>📱 NexorAI ko App ki tarah install karo!</span>
+    <button onclick="installPWA()">Install</button>
+    <button class="ib-close" onclick="document.getElementById('install-banner').classList.remove('show')">✕</button>
+  </div>
+
+  <header>
+    <div class="hd-icon">
+      <svg viewBox="0 0 40 40" fill="none"><path d="M20 3L35 11.5V28.5L20 37L5 28.5V11.5L20 3Z" stroke="#00f5d4" stroke-width="1.4" opacity=".5"/><circle cx="20" cy="20" r="4.5" fill="#00f5d4"/><line x1="20" y1="3" x2="20" y2="15.5" stroke="#00f5d4" stroke-width="1.2" opacity=".7"/><line x1="20" y1="24.5" x2="20" y2="37" stroke="#00f5d4" stroke-width="1.2" opacity=".7"/><line x1="5" y1="11.5" x2="15.5" y2="17.5" stroke="#00f5d4" stroke-width="1.2" opacity=".7"/><line x1="24.5" y1="22.5" x2="35" y2="28.5" stroke="#00f5d4" stroke-width="1.2" opacity=".7"/><line x1="35" y1="11.5" x2="24.5" y2="17.5" stroke="#00f5d4" stroke-width="1.2" opacity=".7"/><line x1="15.5" y1="22.5" x2="5" y2="28.5" stroke="#00f5d4" stroke-width="1.2" opacity=".7"/></svg>
+    </div>
+    <div><div class="hd-name">NexorAI</div><div class="hd-ver">Ultimate v5.0</div></div>
+    <div class="hd-right">
+      <button class="persona-btn" id="persona-btn" onclick="openPersona()">
+        <span id="persona-emoji">🤖</span><span id="persona-label">AI Mode</span>
+      </button>
+      <!-- Stats -->
+      <button class="stats-chip" onclick="openStats()" title="Usage Stats">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span id="stats-msg-count">0</span>
+      </button>
+      <!-- Voice Selector -->
+      <button class="hd-action" title="Voice Settings" onclick="openVoiceModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+      </button>
+      <!-- Export -->
+      <button class="hd-action" title="Export Chat" onclick="exportChat()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </button>
+      <!-- History -->
+      <button class="hd-action" title="Chat History" onclick="toggleHistory()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      </button>
+      <div class="hd-status"><div class="pip"></div><span>ONLINE</span></div>
+    </div>
+  </header>
+
+  <div id="chat-box">
+    <div id="empty">
+      <div class="empty-icon">
+        <svg viewBox="0 0 40 40" fill="none"><path d="M20 3L35 11.5V28.5L20 37L5 28.5V11.5L20 3Z" stroke="#00f5d4" stroke-width="1.4" opacity=".25"/><circle cx="20" cy="20" r="4.5" fill="#00f5d4" opacity=".4"/></svg>
+      </div>
+      <h3>NexorAI Ultimate v5</h3>
+      <p>Chat · Image · Voice · File · Photo · Link · History · Export</p>
+      <div class="suggestions">
+        <button class="sug-btn" onclick="quickSend('Aaj ka weather kaisa hai?')">🌤 Weather</button>
+        <button class="sug-btn" onclick="quickSend('Ek Python code example do')">💻 Code</button>
+        <button class="sug-btn" onclick="quickSend('Mujhe ek joke sunao')">😂 Joke</button>
+        <button class="sug-btn" onclick="quickSend('AI ke baare mein batao')">🤖 AI Info</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLUS MENU POPUP -->
+  <div id="plus-menu" class="plus-menu-popup">
+    <div class="pm-grid">
+      <button class="pm-item" onclick="plusAction('file')">
+        <div class="pm-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></div>
+        <span>File</span>
+      </button>
+      <button class="pm-item" onclick="plusAction('photo')">
+        <div class="pm-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+        <span>Photo</span>
+      </button>
+      <button class="pm-item" onclick="plusAction('voice')">
+        <div class="pm-icon" id="pm-voice-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div>
+        <span>Voice</span>
+      </button>
+      <button class="pm-item" onclick="plusAction('image')">
+        <div class="pm-icon pm-cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
+        <span>Image</span>
+      </button>
+      <button class="pm-item" onclick="plusAction('template')">
+        <div class="pm-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+        <span>Templates</span>
+      </button>
+      <button class="pm-item" onclick="plusAction('persona')">
+        <div class="pm-icon pm-violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <span>Persona</span>
+      </button>
+    </div>
+    <!-- Templates sub-bar -->
+    <div id="pm-tpl-bar" style="display:none;padding:10px 4px 0;border-top:1px solid var(--glass-b);margin-top:10px;">
+      <div style="font-size:.65rem;color:var(--txt3);margin-bottom:8px;letter-spacing:.07em;text-transform:uppercase;">Quick Templates</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="tpl-pill" onclick="useTpl('Summarize karo: ')">📝 Summarize</button>
+        <button class="tpl-pill" onclick="useTpl('Translate to English: ')">🌐 Translate</button>
+        <button class="tpl-pill" onclick="useTpl('Fix this code: ')">🐛 Fix Code</button>
+        <button class="tpl-pill" onclick="useTpl('Make shorter: ')">✂️ Shorten</button>
+        <button class="tpl-pill" onclick="useTpl('Explain simply: ')">💡 Explain</button>
+        <button class="tpl-pill" onclick="useTpl('Improve this: ')">✨ Improve</button>
+        <button class="tpl-pill" onclick="useTpl('Hindi mein batao: ')">🇮🇳 Hindi</button>
+        <button class="tpl-pill" onclick="useTpl('Write professional email: ')">📧 Email</button>
+      </div>
+    </div>
+  </div>
+  <div id="plus-overlay" onclick="closePlusMenu()"></div>
+
+  <div id="input-area">
+    <div id="attach-area"></div>
+    <div id="rate-warn">⚠️ Thoda ruko! Bahut fast messages.</div>
+    <!-- CLEAN INPUT ROW -->
+    <div class="input-row">
+      <!-- Plus button -->
+      <button class="plus-btn" id="plus-btn" onclick="togglePlusMenu()" title="More options">
+        <svg id="plus-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+      <!-- Textarea shell -->
+      <div class="input-shell">
+        <textarea id="ui" rows="1" placeholder="Message..." maxlength="4000"></textarea>
+      </div>
+      <!-- Voice button (always visible, useful) -->
+      <button class="voice-inline-btn" id="voice-btn" onclick="toggleVoice()" title="Voice">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
+      <!-- Send button -->
+      <button class="send-btn" id="btn-chat" onclick="sendChat();if(navigator.vibrate)navigator.vibrate(25);">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+      </button>
+    </div>
+    <!-- hidden image send trigger -->
+    <button id="btn-img" style="display:none;" onclick="sendImage()"></button>
+  </div>
+</div>
+
+<!-- STATS MODAL -->
+<div id="stats-modal" style="display:none;">
+  <div class="modal-overlay" onclick="closeStats(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-title">📊 Usage Stats</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-num" id="st-msgs">0</div><div class="stat-label">Messages Sent</div></div>
+        <div class="stat-card"><div class="stat-num" id="st-imgs">0</div><div class="stat-label">Images Made</div></div>
+        <div class="stat-card"><div class="stat-num" id="st-sessions">0</div><div class="stat-label">Sessions</div></div>
+        <div class="stat-card"><div class="stat-num" id="st-words">0</div><div class="stat-label">Words Received</div></div>
+      </div>
+      <button class="modal-close" onclick="closeStats()" style="margin-top:14px;">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- VOICE SELECTOR MODAL -->
+<div id="voice-modal" style="display:none;">
+  <div class="modal-overlay" onclick="closeVoiceModal(event)">
+    <div class="modal-box voice-modal-box" onclick="event.stopPropagation()">
+      <div class="modal-title">🔊 Voice Artist Choose Karo</div>
+      <input class="vm-search" id="vm-search" placeholder="Search voice ya language..." oninput="filterVoices()"/>
+      <div class="vm-langs" id="vm-langs">
+        <button class="vm-lang-btn active" onclick="filterByLang('',this)">All</button>
+        <button class="vm-lang-btn" onclick="filterByLang('hi',this)">🇮🇳 Hindi</button>
+        <button class="vm-lang-btn" onclick="filterByLang('en',this)">🇬🇧 English</button>
+        <button class="vm-lang-btn" onclick="filterByLang('zh',this)">🇨🇳 Chinese</button>
+        <button class="vm-lang-btn" onclick="filterByLang('fr',this)">🇫🇷 French</button>
+        <button class="vm-lang-btn" onclick="filterByLang('es',this)">🇪🇸 Spanish</button>
+        <button class="vm-lang-btn" onclick="filterByLang('ar',this)">🇸🇦 Arabic</button>
+        <button class="vm-lang-btn" onclick="filterByLang('ja',this)">🇯🇵 Japanese</button>
+        <button class="vm-lang-btn" onclick="filterByLang('de',this)">🇩🇪 German</button>
+        <button class="vm-lang-btn" onclick="filterByLang('ko',this)">🇰🇷 Korean</button>
+        <button class="vm-lang-btn" onclick="filterByLang('pt',this)">🇧🇷 Portuguese</button>
+        <button class="vm-lang-btn" onclick="filterByLang('ru',this)">🇷🇺 Russian</button>
+      </div>
+      <div class="vm-list" id="vm-list"></div>
+      <div class="vm-speed">
+        <span class="vm-speed-label">Speed:</span>
+        <input type="range" min="0.5" max="2" step="0.1" value="1.2" id="vm-speed" oninput="document.getElementById('vm-speed-val').textContent=parseFloat(this.value).toFixed(1)+'x'"/>
+        <span class="vm-speed-val" id="vm-speed-val">1.2x</span>
+      </div>
+      <button class="modal-close" onclick="closeVoiceModal()" style="margin-top:10px;">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════
+   CONFIG
+════════════════════════════════════ */
+const API  = 'https://courtesy-written-probability-literature.trycloudflare.com';
+const PASS = 'nexorai2026';
+let key = null, busy = false;
+let attachedFile = null, attachedLink = null;
+let imgStyle = '';
+let recognition = null, isRecording = false;
+let ttsUtterance = null, ttsPlaying = false;
+let deferredInstall = null;
+let rateLimitTimer = null, msgCount = 0;
+
+/* ════════════════════════════════════
+   PERSONAS
+════════════════════════════════════ */
+const PERSONAS = [
+  {id:'default', emoji:'🤖', name:'Default AI',    desc:'General purpose Hinglish AI',          system:'Tum Nexorai Ultra ho — ek smart AI jo sirf zaroori baatein karta hai. Current date: March 2026. Donald Trump USA ke President hain. Hamesha Hinglish mein baat karo. Jaisa sawaal vaisa jawab do — choti baat pe chota jawab, badi baat pe bada jawab.'},
+  {id:'coder',   emoji:'👨‍💻', name:'Coder Mode',    desc:'Code likho, debug karo, explain karo',  system:'Tum expert programmer ho. Seedha working code do. Unnecessary explanation mat karo. Sirf code + brief comment. Hinglish mein samjhao. Current date: March 2026.'},
+  {id:'creative',emoji:'🎨', name:'Creative Mode', desc:'Stories, poems, creative writing',       system:'Tum creative writer ho. Mazedaar content likho. User ne jitna maanga utna do — chota maanga toh chota, bada maanga toh bada. Hinglish mein. Current date: March 2026.'},
+  {id:'teacher', emoji:'📚', name:'Teacher Mode',  desc:'Clearly samjhao, examples do',           system:'Tum patient teacher ho. Simple Hinglish mein samjhao. Short question = short answer with example. Complex topic = step by step. Current date: March 2026.'},
+  {id:'funny',   emoji:'😂', name:'Funny Mode',    desc:'Jokes, roast, comedy',                   system:'Tum comedian ho. Short, punchy, funny jawab do. Ek achha joke better hai 5 bekar jokes se. Hinglish mein. Current date: March 2026.'},
+  {id:'doctor',  emoji:'🩺', name:'Health Guide',  desc:'Health tips (not medical advice)',       system:'Tum health info assistant ho. Seedha helpful tips do. Hamesha end mein likho "Doctor se milna zaroori hai". Hinglish mein. Current date: March 2026.'},
+  {id:'finance', emoji:'💰', name:'Finance Mode',  desc:'Money, investment, budget tips',         system:'Tum finance guide ho. Clear, practical tips do. Hamesha disclaimer lagao. Koi padding nahi — seedha point pe aao. Hinglish mein. Current date: March 2026.'},
+  {id:'news',    emoji:'📰', name:'News Mode',     desc:'Current events, news analysis',          system:'Tum news analyst ho. Factual, balanced, concise reporting karo. Bullet points use karo key points ke liye. Hinglish mein. Current date: March 2026. Donald Trump USA President hai.'},
+];
+let currentPersona = PERSONAS[0];
+
+function buildPersonaGrid() {
+  const grid = document.getElementById('persona-grid');
+  grid.innerHTML = '';
+  PERSONAS.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'persona-card' + (p.id===currentPersona.id?' active':'');
+    card.innerHTML = `<div class="persona-emoji">${p.emoji}</div><div class="persona-name">${p.name}</div><div class="persona-desc">${p.desc}</div>`;
+    card.onclick = () => selectPersona(p);
+    grid.appendChild(card);
+  });
+}
+function openPersona(){ buildPersonaGrid(); document.getElementById('persona-modal').style.display='block'; }
+function closePersona(e){ if(!e||e.target===document.querySelector('.modal-overlay')||!e){ document.getElementById('persona-modal').style.display='none'; } }
+function selectPersona(p){
+  currentPersona=p;
+  document.getElementById('persona-emoji').textContent=p.emoji;
+  document.getElementById('persona-label').textContent=p.name;
+  document.getElementById('persona-modal').style.display='none';
+  showToast(`${p.emoji} ${p.name} activated!`);
+}
+
+/* ════════════════════════════════════
+   CHAT HISTORY (localStorage)
+════════════════════════════════════ */
+let sessions = [];
+let currentSessionId = null;
+let chatHistory = []; // [{role,content}] for current session
+
+function loadSessions(){
+  try{ sessions = JSON.parse(localStorage.getItem('nx_sessions')||'[]'); }catch(e){ sessions=[]; }
+}
+function saveSessions(){
+  try{ localStorage.setItem('nx_sessions', JSON.stringify(sessions)); }catch(e){}
+}
+function newChat(){
+  if(currentSessionId) saveCurrentSession();
+  currentSessionId = 'nx_'+Date.now();
+  chatHistory = [];
+  sessions.unshift({id:currentSessionId, title:'New Chat', time:Date.now(), messages:[]});
+  saveSessions();
+  clearChatUI();
+  renderHistoryPanel();
+  if(document.getElementById('history-panel').classList.contains('open')) toggleHistory();
+}
+function saveCurrentSession(){
+  if(!currentSessionId) return;
+  const idx = sessions.findIndex(s=>s.id===currentSessionId);
+  if(idx>=0){
+    sessions[idx].messages = chatHistory;
+    const firstUser = chatHistory.find(m=>m.role==='user');
+    if(firstUser) sessions[idx].title = firstUser.content.substring(0,35)+(firstUser.content.length>35?'...':'');
+    saveSessions();
+  }
+}
+function loadSession(id){
+  saveCurrentSession();
+  const s = sessions.find(s=>s.id===id);
+  if(!s) return;
+  currentSessionId = id;
+  chatHistory = s.messages||[];
+  clearChatUI();
+  chatHistory.forEach(m=>{ if(m.role!=='system') replayMsg(m); });
+  renderHistoryPanel();
+  if(document.getElementById('history-panel').classList.contains('open')) toggleHistory();
+}
+function replayMsg(m){
+  if(m.role==='user') addMsg('user', m.content, false,'',true);
+  else if(m.role==='assistant') addMsg('ai', m.content, false,'',true);
+}
+function clearChatUI(){
+  const box = document.getElementById('chat-box');
+  box.innerHTML = '';
+  if(chatHistory.length===0){
+    box.innerHTML = `<div id="empty"><div class="empty-icon"><svg viewBox="0 0 40 40" fill="none"><path d="M20 3L35 11.5V28.5L20 37L5 28.5V11.5L20 3Z" stroke="#00f5d4" stroke-width="1.4" opacity=".25"/><circle cx="20" cy="20" r="4.5" fill="#00f5d4" opacity=".4"/></svg></div><h3>NexorAI Ultimate v5</h3><p>Chat · Image · Voice · File · Photo · Link · History · Export</p><div class="suggestions"><button class="sug-btn" onclick="quickSend('Aaj ka weather kaisa hai?')">🌤 Weather</button><button class="sug-btn" onclick="quickSend('Ek Python code example do')">💻 Code</button><button class="sug-btn" onclick="quickSend('Mujhe ek joke sunao')">😂 Joke</button><button class="sug-btn" onclick="quickSend('AI ke baare mein batao')">🤖 AI Info</button></div></div>`;
+  }
+}
+function renderHistoryPanel(){
+  const list = document.getElementById('hp-list');
+  list.innerHTML = '';
+  if(sessions.length===0){ list.innerHTML='<div class="hp-empty">Abhi koi history nahi hai.</div>'; return; }
+  sessions.forEach(s=>{
+    const item = document.createElement('div');
+    item.className = 'hp-item'+(s.id===currentSessionId?' active':'');
+    item.innerHTML = `<div class="hp-item-title">${s.title||'New Chat'}</div><div class="hp-item-time">${new Date(s.time).toLocaleDateString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>`;
+    item.onclick = ()=>loadSession(s.id);
+    list.appendChild(item);
+  });
+}
+function toggleHistory(){
+  const p = document.getElementById('history-panel');
+  p.classList.toggle('open');
+  if(p.classList.contains('open')){ loadSessions(); renderHistoryPanel(); }
+}
+
+/* ════════════════════════════════════
+   EXPORT CHAT
+════════════════════════════════════ */
+function exportChat(){
+  if(chatHistory.length===0){ showToast('❌ Koi chat nahi hai export karne ke liye'); return; }
+  const lines = ['NexorAI Chat Export','='.repeat(40),''];
+  chatHistory.forEach(m=>{
+    if(m.role==='user') lines.push('YOU: '+m.content);
+    else if(m.role==='assistant') lines.push('AI: '+m.content);
+    lines.push('');
+  });
+  const blob = new Blob([lines.join('\n')], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'nexorai-chat-'+Date.now()+'.txt';
+  a.click();
+  showToast('✅ Chat exported!');
+}
+
+/* ════════════════════════════════════
+   PWA
+════════════════════════════════════ */
+// Inline manifest
+const manifest = {name:'NexorAI',short_name:'NexorAI',description:'NexorAI Ultimate',start_url:'/',display:'standalone',background_color:'#07090d',theme_color:'#07090d',icons:[{src:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%2307090d"/><text y=".9em" font-size="80">🤖</text></svg>',sizes:'any',type:'image/svg+xml'}]};
+const mBlob = new Blob([JSON.stringify(manifest)],{type:'application/json'});
+document.getElementById('pwa-manifest').href = URL.createObjectURL(mBlob);
+
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault(); deferredInstall=e;
+  document.getElementById('install-banner').classList.add('show');
+});
+window.addEventListener('appinstalled',()=>{ document.getElementById('install-banner').classList.remove('show'); showToast('✅ NexorAI installed!'); });
+function installPWA(){ if(deferredInstall){ deferredInstall.prompt(); deferredInstall.userChoice.then(()=>{deferredInstall=null;}); } }
+
+/* ════════════════════════════════════
+   VOICE INPUT (Speech Recognition)
+════════════════════════════════════ */
+function toggleVoice(){
+  const btn = document.getElementById('voice-btn');
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRec){ showToast('❌ Browser voice support nahi karta'); return; }
+  if(isRecording){ recognition.stop(); return; }
+  recognition = new SpeechRec();
+  recognition.lang = 'hi-IN';
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.onstart = ()=>{ isRecording=true; btn.classList.add('recording'); showToast('🎤 Boliye...'); };
+  recognition.onresult = e=>{
+    const t = e.results[0][0].transcript;
+    document.getElementById('ui').value = t;
+    autoResize();
+    showToast('✅ Voice captured!');
+  };
+  recognition.onerror = e=>{
+    isRecording=false; btn.classList.remove('recording');
+    if(e.error==='not-allowed') showToast('❌ Mic permission do Settings mein');
+    else showToast('❌ Voice error: ' + e.error);
+  };
+  recognition.onend = ()=>{ isRecording=false; btn.classList.remove('recording'); };
+  recognition.start();
+}
+
+/* ════════════════════════════════════
+   TTS - Full Voice Selector System
+════════════════════════════════════ */
+let ttsVoices = [];
+let selectedVoice = null; // manually selected
+let ttsSpeed = 1.2;
+let vmLangFilter = '';
+
+// Lang code → flag + name map
+const LANG_MAP = {
+  'hi':'🇮🇳 Hindi','en':'🇬🇧 English','zh':'🇨🇳 Chinese','fr':'🇫🇷 French',
+  'es':'🇪🇸 Spanish','ar':'🇸🇦 Arabic','ja':'🇯🇵 Japanese','de':'🇩🇪 German',
+  'ko':'🇰🇷 Korean','pt':'🇧🇷 Portuguese','ru':'🇷🇺 Russian','it':'🇮🇹 Italian',
+  'nl':'🇳🇱 Dutch','pl':'🇵🇱 Polish','tr':'🇹🇷 Turkish','sv':'🇸🇪 Swedish',
+  'nb':'🇳🇴 Norwegian','da':'🇩🇰 Danish','fi':'🇫🇮 Finnish','uk':'🇺🇦 Ukrainian',
+  'id':'🇮🇩 Indonesian','ms':'🇲🇾 Malay','th':'🇹🇭 Thai','vi':'🇻🇳 Vietnamese',
+};
+
+function getLangFlag(langCode){
+  const base = langCode.split('-')[0].toLowerCase();
+  return LANG_MAP[base] || ('🌐 ' + langCode);
+}
+
+function loadVoices(){
+  if(!window.speechSynthesis) return;
+  ttsVoices = window.speechSynthesis.getVoices();
+  // restore saved voice
+  const saved = localStorage.getItem('nx_voice');
+  if(saved && ttsVoices.length){
+    selectedVoice = ttsVoices.find(v=>v.name===saved) || null;
+  }
+  const savedSpeed = parseFloat(localStorage.getItem('nx_tts_speed'));
+  if(savedSpeed) ttsSpeed = savedSpeed;
+}
+if(window.speechSynthesis){
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+  setTimeout(loadVoices, 600);
+}
+
+function openVoiceModal(){
+  loadVoices();
+  const speedEl = document.getElementById('vm-speed');
+  const speedVal = document.getElementById('vm-speed-val');
+  if(speedEl){ speedEl.value = ttsSpeed; speedVal.textContent = ttsSpeed.toFixed(1)+'x'; }
+  renderVoiceList();
+  document.getElementById('voice-modal').style.display='block';
+}
+function closeVoiceModal(e){
+  if(!e || e.target===document.querySelector('#voice-modal .modal-overlay')){
+    // save speed
+    ttsSpeed = parseFloat(document.getElementById('vm-speed').value) || 1.2;
+    localStorage.setItem('nx_tts_speed', ttsSpeed);
+    document.getElementById('voice-modal').style.display='none';
+  }
+}
+
+function filterByLang(lang, btn){
+  vmLangFilter = lang;
+  document.querySelectorAll('.vm-lang-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderVoiceList();
+}
+function filterVoices(){ renderVoiceList(); }
+
+function renderVoiceList(){
+  const list = document.getElementById('vm-list');
+  const search = (document.getElementById('vm-search')?.value||'').toLowerCase();
+  if(!list) return;
+
+  let voices = ttsVoices;
+  if(vmLangFilter) voices = voices.filter(v=>v.lang.toLowerCase().startsWith(vmLangFilter));
+  if(search) voices = voices.filter(v=>v.name.toLowerCase().includes(search)||v.lang.toLowerCase().includes(search));
+
+  if(voices.length===0){
+    list.innerHTML='<div class="vm-empty">Koi voice nahi mili 😔<br><small>Device mein yeh language install nahi hai</small></div>';
+    return;
+  }
+
+  list.innerHTML = voices.map((v,i)=>{
+    const isSelected = selectedVoice && selectedVoice.name===v.name;
+    const langLabel = getLangFlag(v.lang);
+    const isLocal = v.localService ? '📱' : '☁️';
+    return `<div class="vm-item${isSelected?' selected':''}" onclick="selectVoice('${v.name.replace(/'/g,"\\'")}',this)">
+      <span class="vm-flag">${langLabel.split(' ')[0]}</span>
+      <div class="vm-info">
+        <div class="vm-name">${isLocal} ${v.name}</div>
+        <div class="vm-lang">${langLabel} · ${v.lang}</div>
+      </div>
+      <button class="vm-preview" onclick="event.stopPropagation();previewVoice('${v.name.replace(/'/g,"\\'")}')">▶ Test</button>
+    </div>`;
+  }).join('');
+}
+
+function selectVoice(name, el){
+  selectedVoice = ttsVoices.find(v=>v.name===name) || null;
+  if(selectedVoice){ localStorage.setItem('nx_voice', name); }
+  document.querySelectorAll('.vm-item').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  showToast('✅ Voice: ' + name.split(' ').slice(0,3).join(' '));
+}
+
+function previewVoice(name){
+  const voice = ttsVoices.find(v=>v.name===name);
+  if(!voice) return;
+  window.speechSynthesis.cancel();
+  const lang = voice.lang.split('-')[0].toLowerCase();
+  const previews = {
+    'hi': 'नमस्ते! मैं NexorAI हूँ।',
+    'en': 'Hello! I am NexorAI, your AI assistant.',
+    'zh': '你好！我是NexorAI。',
+    'fr': 'Bonjour! Je suis NexorAI.',
+    'es': '¡Hola! Soy NexorAI.',
+    'ar': 'مرحباً! أنا NexorAI.',
+    'ja': 'こんにちは！私はNexorAIです。',
+    'de': 'Hallo! Ich bin NexorAI.',
+    'ko': '안녕하세요! 저는 NexorAI입니다.',
+    'pt': 'Olá! Eu sou NexorAI.',
+    'ru': 'Привет! Я NexorAI.',
+  };
+  const text = previews[lang] || 'Hello! I am NexorAI.';
+  const u = new SpeechSynthesisUtterance(text);
+  u.voice = voice; u.lang = voice.lang;
+  u.rate = parseFloat(document.getElementById('vm-speed')?.value||1.2);
+  window.speechSynthesis.speak(u);
+}
+
+function detectLang(text){
+  if(/[\u0900-\u097F]/.test(text)) return 'hi-IN';
+  if(/[\u4E00-\u9FFF\u3400-\u4DBF]/.test(text)) return 'zh-CN';
+  if(/[\u0600-\u06FF]/.test(text)) return 'ar-SA';
+  if(/[\u3040-\u309F\u30A0-\u30FF]/.test(text)) return 'ja-JP';
+  if(/[\uAC00-\uD7AF]/.test(text)) return 'ko-KR';
+  if(/[\u0400-\u04FF]/.test(text)) return 'ru-RU';
+  const hinglish = ['hai','kya','nahi','haan','toh','aur','mein','ko','se','ka','ki','ke','ek','yeh','woh','karo','batao'];
+  const words = text.toLowerCase().split(/\s+/);
+  if(words.filter(w=>hinglish.includes(w)).length >= 2) return 'hi-IN';
+  return 'en-IN';
+}
+
+function getAutoVoice(langCode){
+  const base = langCode.split('-')[0].toLowerCase();
+  // Priority names per language
+  const priorities = {
+    'hi': ['Microsoft Swara','Swara','Google हिन्दी','Google Hindi'],
+    'en': ['Microsoft Heera','Google UK English Female','Microsoft Zira','Google US English'],
+    'zh': ['Microsoft Huihui','Google 普通话','Microsoft Yaoyao'],
+    'fr': ['Microsoft Hortense','Google français','Microsoft Julie'],
+    'es': ['Microsoft Helena','Google español','Microsoft Sabina'],
+    'ar': ['Microsoft Naayf','Google عربي'],
+    'ja': ['Microsoft Haruka','Google 日本語'],
+    'de': ['Microsoft Hedda','Google Deutsch'],
+    'ko': ['Microsoft Heami','Google 한국의'],
+    'pt': ['Microsoft Maria','Google português do Brasil'],
+    'ru': ['Microsoft Irina','Google русский'],
+  };
+  const pList = priorities[base] || [];
+  for(const name of pList){
+    const v = ttsVoices.find(v=>v.name.includes(name));
+    if(v) return v;
+  }
+  return ttsVoices.find(v=>v.lang.startsWith(base)) || ttsVoices.find(v=>v.lang.startsWith('en')) || null;
+}
+
+function speakText(text, btn){
+  if(!window.speechSynthesis){ showToast('❌ TTS support nahi hai'); return; }
+  if(ttsPlaying){
+    window.speechSynthesis.cancel(); ttsPlaying=false;
+    document.querySelectorAll('.tts-btn').forEach(b=>b.classList.remove('playing'));
+    if(btn) btn.classList.remove('playing');
+    return;
+  }
+  const clean = text.replace(/[#*`_~]/g,'').replace(/\n+/g,' ').replace(/\s+/g,' ').trim();
+  const detectedLang = detectLang(clean);
+  const voice = selectedVoice || getAutoVoice(detectedLang);
+
+  ttsUtterance = new SpeechSynthesisUtterance(clean);
+  ttsUtterance.lang = voice ? voice.lang : detectedLang;
+  ttsUtterance.rate = ttsSpeed;
+  ttsUtterance.pitch = 1.0;
+  if(voice) ttsUtterance.voice = voice;
+
+  ttsUtterance.onstart = ()=>{ ttsPlaying=true; if(btn) btn.classList.add('playing'); };
+  ttsUtterance.onend = ()=>{ ttsPlaying=false; if(btn) btn.classList.remove('playing'); };
+  ttsUtterance.onerror = ()=>{ ttsPlaying=false; if(btn) btn.classList.remove('playing'); };
+  window.speechSynthesis.speak(ttsUtterance);
+}
+
+/* ════════════════════════════════════
+   RATE LIMITING
+════════════════════════════════════ */
+function checkRateLimit(){
+  msgCount++;
+  if(msgCount>=5){
+    document.getElementById('rate-warn').classList.add('show');
+    clearTimeout(rateLimitTimer);
+    rateLimitTimer = setTimeout(()=>{ msgCount=0; document.getElementById('rate-warn').classList.remove('show'); }, 15000);
+  }
+}
+
+/* ════════════════════════════════════
+   TOAST
+════════════════════════════════════ */
+function showToast(msg){
+  let t=document.getElementById('toast-el');
+  if(!t){ t=document.createElement('div'); t.id='toast-el'; t.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(20,25,35,0.95);border:1px solid rgba(0,245,212,.3);color:#e4eaf0;padding:8px 18px;border-radius:20px;font-size:.78rem;z-index:9999;pointer-events:none;backdrop-filter:blur(12px);transition:opacity .3s;white-space:nowrap;'; document.body.appendChild(t); }
+  t.textContent=msg; t.style.opacity='1';
+  clearTimeout(t._timer); t._timer=setTimeout(()=>t.style.opacity='0',2500);
+}
+
+/* ════════════════════════════════════
+   MARKED SETUP
+════════════════════════════════════ */
+const renderer = new marked.Renderer();
+renderer.code = function(code, lang){
+  const language=(lang||'plaintext').trim(); let hi=code;
+  try{ hi=hljs.getLanguage(language)?hljs.highlight(code,{language,ignoreIllegals:true}).value:hljs.highlightAuto(code).value; }catch(e){}
+  const id='cb'+Math.random().toString(36).slice(2,8);
+  return `<div class="cbwrap" id="${id}"><div class="cbhead"><span class="cblang">${language}</span><button class="cpbtn" onclick="copyCode('${id}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button></div><pre><code class="hljs">${hi}</code></pre></div>`;
+};
+marked.use({renderer, breaks:true, gfm:true});
+
+/* ════════════════════════════════════
+   LOGIN
+════════════════════════════════════ */
+function togglePw(){
+  const pw=document.getElementById('lpw'),svg=document.getElementById('eye-svg');
+  pw.type=pw.type==='password'?'text':'password';
+  svg.innerHTML=pw.type==='text'?'<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>':'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+}
+function doLogin(){
+  const val=document.getElementById('lpw').value,errEl=document.getElementById('lerr'),errTx=document.getElementById('errtxt'),pwEl=document.getElementById('lpw');
+  if(val===PASS){
+    key=val;
+    const scr=document.getElementById('login-screen');
+    scr.classList.add('out'); setTimeout(()=>scr.remove(),400);
+    loadSessions();
+    newChat();
+    addMsg('ai','✅ **NexorAI Ultimate v5** mein aapka swagat hai!\n\n**Features:**\n- 💬 Chat with memory\n- 🎭 8 AI Personas\n- 🎤 Voice Input\n- 🔊 Text-to-Speech\n- 📎 File Upload & Analysis\n- 📷 Image Upload & Analysis\n- 🔗 Link Analysis\n- 🎨 Image Generation (6 styles)\n- 💾 Chat History\n- 📤 Export Chat\n- 📱 PWA Install\n\nKya karna hai aaj? 🚀');
+  } else {
+    errTx.textContent=val.length===0?'Password daalo.':'Galat password!';
+    errEl.classList.add('show'); pwEl.classList.add('shake');
+    pwEl.addEventListener('animationend',()=>pwEl.classList.remove('shake'),{once:true});
+    pwEl.value=''; pwEl.focus();
+  }
+}
+document.getElementById('lpw').addEventListener('input',()=>document.getElementById('lerr').classList.remove('show'));
+document.getElementById('lpw').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();doLogin();}});
+
+/* ════════════════════════════════════
+   FILE INPUTS
+════════════════════════════════════ */
+document.getElementById('file-input').addEventListener('change',function(){
+  const file=this.files[0]; if(!file) return;
+  attachedFile={type:'file',file}; attachedLink=null;
+  renderAttachPreview(); this.value='';
+});
+document.getElementById('img-input').addEventListener('change',function(){
+  const file=this.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{ attachedFile={type:'image',file,preview:e.target.result}; attachedLink=null; renderAttachPreview(); };
+  reader.readAsDataURL(file); this.value='';
+});
+
+function renderAttachPreview(){
+  const area=document.getElementById('attach-area'); area.innerHTML='';
+  if(attachedFile){
+    const div=document.createElement('div'); div.className='attach-preview';
+    if(attachedFile.type==='image'&&attachedFile.preview){ const img=document.createElement('img'); img.src=attachedFile.preview; div.appendChild(img); }
+    else{ div.innerHTML=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00f5d4" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`; }
+    const name=document.createElement('span'); name.className='fname'; name.textContent=attachedFile.file.name;
+    const rm=document.createElement('button'); rm.className='rm-btn'; rm.textContent='✕'; rm.onclick=()=>{attachedFile=null;area.innerHTML='';};
+    div.appendChild(name); div.appendChild(rm); area.appendChild(div);
+  }
+  if(attachedLink){
+    const div=document.createElement('div'); div.className='link-bar';
+    div.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7c6bff" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
+    const span=document.createElement('span'); span.textContent=attachedLink;
+    const rm=document.createElement('button'); rm.className='rm-btn'; rm.textContent='✕';
+    rm.onclick=()=>{attachedLink=null;document.getElementById('link-btn').classList.remove('active');area.innerHTML='';};
+    div.appendChild(span); div.appendChild(rm); area.appendChild(div);
+  }
+}
+
+function toggleLinkBar(){
+  const area=document.getElementById('attach-area'),btn=document.getElementById('link-btn');
+  if(attachedLink){attachedLink=null;btn.classList.remove('active');renderAttachPreview();return;}
+  const val=document.getElementById('ui').value.trim();
+  const urlRx=/https?:\/\/[^\s]+/;
+  if(urlRx.test(val)){attachedLink=val.match(urlRx)[0];document.getElementById('ui').value='';btn.classList.add('active');attachedFile=null;renderAttachPreview();return;}
+  const url=prompt('URL paste karo:');
+  if(url&&url.startsWith('http')){attachedLink=url;btn.classList.add('active');attachedFile=null;renderAttachPreview();}
+}
+
+/* ════════════════════════════════════
+   IMAGE STYLES
+════════════════════════════════════ */
+function setStyle(el, style){ imgStyle=style; document.querySelectorAll('.style-pill').forEach(p=>p.classList.remove('active')); el.classList.add('active'); }
+function toggleStyleBar(){ const bar=document.getElementById('style-bar'); bar.classList.toggle('show'); document.getElementById('style-toggle').classList.toggle('active'); }
+
+/* ════════════════════════════════════
+   UTILS
+════════════════════════════════════ */
+function removeEmpty(){const e=document.getElementById('empty');if(e)e.remove();}
+function tstamp(){return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+function setUI(state){busy=state;['btn-chat','btn-img'].forEach(id=>document.getElementById(id).disabled=state);document.getElementById('ui').disabled=state;}
+function getPrompt(){const el=document.getElementById('ui');const v=el.value.trim();el.value='';el.style.height='auto';return v;}
+function quickSend(text){document.getElementById('ui').value=text;sendChat();}
+function autoResize(){const el=document.getElementById('ui');el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
+function copyCode(id){
+  const wrap=document.getElementById(id);if(!wrap)return;
+  navigator.clipboard.writeText(wrap.querySelector('pre code').textContent).then(()=>{
+    const btn=wrap.querySelector('.cpbtn');btn.classList.add('ok');btn.textContent='✓ Copied!';
+    setTimeout(()=>{btn.classList.remove('ok');btn.innerHTML=`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy`;},2000);
+  }).catch(()=>{});
+}
+
+/* ════════════════════════════════════
+   ADD MESSAGE
+════════════════════════════════════ */
+function addMsg(role, text, isImg=false, imgSrc='', replay=false){
+  removeEmpty();
+  const box=document.getElementById('chat-box');
+  const wrap=document.createElement('div'); wrap.className=`msg ${role}`;
+  const av=document.createElement('div'); av.className='av'; av.textContent=role==='user'?'YOU':'AI';
+  const col=document.createElement('div'); col.className='mcol';
+  const bub=document.createElement('div'); bub.className='bubble';
+
+  if(isImg){
+    const img=document.createElement('img'); img.src=imgSrc; img.alt='Generated'; img.loading='lazy';
+    img.onclick=()=>window.open(imgSrc,'_blank');
+    const dl=document.createElement('a'); dl.className='dl-btn'; dl.href=imgSrc; dl.download='nexorai-'+Date.now()+'.jpg';
+    dl.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download`;
+    bub.appendChild(img); bub.appendChild(dl);
+  } else if(text.startsWith('⚠️')||text.startsWith('❌')){
+    bub.classList.add('errb'); bub.textContent=text;
+  } else {
+    const md=document.createElement('div'); md.className='mdb'; md.innerHTML=marked.parse(text);
+    bub.appendChild(md);
+  }
+
+  const ts=document.createElement('div'); ts.className='ts'; ts.textContent=tstamp();
+
+  // Message actions (copy, TTS for AI messages)
+  const actions=document.createElement('div'); actions.className='msg-actions';
+  const copyBtn=document.createElement('button'); copyBtn.className='ma-btn';
+  copyBtn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy`;
+  copyBtn.onclick=()=>{ navigator.clipboard.writeText(text).then(()=>showToast('✅ Copied!')); };
+  actions.appendChild(copyBtn);
+
+  if(role==='ai' && !isImg){
+    const ttsBtn=document.createElement('button'); ttsBtn.className='tts-btn';
+    ttsBtn.innerHTML=`<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>Listen`;
+    ttsBtn.onclick=()=>speakText(text, ttsBtn);
+    actions.appendChild(ttsBtn);
+  }
+
+  col.appendChild(bub); col.appendChild(ts); col.appendChild(actions);
+  if(role==='user'){wrap.appendChild(col);wrap.appendChild(av);}
+  else{wrap.appendChild(av);wrap.appendChild(col);}
+  box.appendChild(wrap); box.scrollTop=box.scrollHeight;
+
+  // Save to history
+  if(!replay && !isImg){
+    chatHistory.push({role:role==='user'?'user':'assistant', content:text});
+    saveCurrentSession();
+  }
+}
+
+/* ════════════════════════════════════
+   LOADING
+════════════════════════════════════ */
+function addLoading(){
+  removeEmpty();
+  const box=document.getElementById('chat-box');
+  const wrap=document.createElement('div'); wrap.className='msg ai'; wrap.id='ldmsg';
+  const av=document.createElement('div'); av.className='av'; av.textContent='AI';
+  const col=document.createElement('div'); col.className='mcol';
+  const bub=document.createElement('div'); bub.className='bubble ldbub';
+  bub.innerHTML=`<div class="lddots"><span></span><span></span><span></span></div><span class="ldtxt">Data analyze kar raha hoon...</span>`;
+  col.appendChild(bub); wrap.appendChild(av); wrap.appendChild(col);
+  box.appendChild(wrap); box.scrollTop=box.scrollHeight;
+}
+function rmLoading(){const el=document.getElementById('ldmsg');if(el)el.remove();}
+
+/* ════════════════════════════════════
+   BUILD CHAT CONTEXT (memory)
+════════════════════════════════════ */
+function detectPromptType(prompt){
+  const p = prompt.trim().toLowerCase();
+  const words = p.split(/\s+/).length;
+
+  // Greetings / small talk → very short
+  const greetings = ['hi','hello','hey','hii','helo','namaste','kya haal','kaise ho','sup','yo','hola','kya chal'];
+  if(words<=3 && greetings.some(g=>p.includes(g))) return 'greeting';
+
+  // Simple yes/no / factual one-liners
+  if(words<=6 && (p.endsWith('?')||p.includes('kya ')||p.includes('kaun ')||p.includes('kab ')||p.includes('kitna '))) return 'quick';
+
+  // Code request
+  if(p.includes('code')||p.includes('function')||p.includes('script')||p.includes('program')||p.includes('bug')||p.includes('error')) return 'code';
+
+  // Explain / detail request
+  if(p.includes('explain')||p.includes('samjhao')||p.includes('detail')||p.includes('batao')||p.includes('kya hai')||p.includes('what is')||p.includes('how to')||p.includes('kaise')) return 'explain';
+
+  // List / compare
+  if(p.includes('list')||p.includes('top ')||p.includes('best ')||p.includes('compare')||p.includes('difference')||p.includes('vs ')||p.includes('farak')) return 'list';
+
+  // Long / essay
+  if(words>=20||p.includes('essay')||p.includes('article')||p.includes('write about')||p.includes('likhdo')||p.includes('story')) return 'long';
+
+  // Default medium
+  return 'medium';
+}
+
+function getResponseInstruction(type){
+  switch(type){
+    case 'greeting': return 'STRICT: Sirf 1-2 lines mein reply karo. Friendly short response only. Koi list ya explanation mat do.';
+    case 'quick':    return 'STRICT: Direct point pe aao. Max 3-4 lines. Agar haan/nahi hai toh sirf woh bolo + 1 line reason.';
+    case 'code':     return 'Code likho with proper formatting. Brief explanation do. Working example zaroori hai.';
+    case 'explain':  return 'Clearly samjhao with examples. Medium length — na bahut chota na bahut lamba. Bullet points use karo agar helpful ho.';
+    case 'list':     return 'Numbered ya bullet list do. Har point concise rakho. Max 6-8 items unless specifically asked for more.';
+    case 'long':     return 'Detailed comprehensive response do with proper sections and headings.';
+    default:         return 'Prompt ke hisaab se appropriate length mein jawab do — na zyada na kam. Natural conversational tone.';
+  }
+}
+
+function buildContext(userPrompt){
+  const type = detectPromptType(userPrompt);
+  const instruction = getResponseInstruction(type);
+  const recent = chatHistory.slice(-6);
+
+  let ctx = currentPersona.system + '\n\n';
+  ctx += '## RESPONSE RULE (FOLLOW STRICTLY):\n' + instruction + '\n\n';
+  ctx += '## STYLE RULES:\n';
+  ctx += '- Jaisa sawaal vaisa jawab — short question = short answer, detailed question = detailed answer\n';
+  ctx += '- Kabhi bhi unnecessary padding, filler lines, ya repetition mat karo\n';
+  ctx += '- "Great question!", "Certainly!", "Of course!" jaisi lines bilkul mat likho\n';
+  ctx += '- Seedha jawab se shuru karo\n\n';
+
+  if(recent.length > 0){
+    ctx += '## CONVERSATION SO FAR:\n';
+    recent.forEach(m=>{ ctx += (m.role==='user'?'User: ':'AI: ') + m.content.substring(0,200) + '\n'; });
+    ctx += '\n';
+  }
+
+  ctx += 'User: ' + userPrompt;
+  return ctx;
+}
+
+/* ════════════════════════════════════
+   SEND CHAT
+════════════════════════════════════ */
+async function sendChat(){
+  if(!key||busy) return;
+  const prompt=getPrompt();
+
+  // Link analysis
+  if(attachedLink){
+    const link=attachedLink; addMsg('user',`🔗 Link analyse karo: ${link}`);
+    attachedLink=null; document.getElementById('link-btn').classList.remove('active');
+    document.getElementById('attach-area').innerHTML='';
+    addLoading(); setUI(true); checkRateLimit();
+    try{
+      const res=await fetch(`${API}/analyze-link?key=${encodeURIComponent(key)}&url=${encodeURIComponent(link)}`,{mode:'cors'});
+      const data=await res.json(); rmLoading();
+      addMsg('ai', data.error?`⚠️ ${data.error}`:data.reply||'No response.');
+    }catch(e){rmLoading();addMsg('ai',`❌ Network error: ${e.message}`);}
+    finally{setUI(false);document.getElementById('ui').focus();}
+    return;
+  }
+
+  // File analysis
+  if(attachedFile&&attachedFile.type==='file'){
+    const file=attachedFile.file; const up=prompt||'Is file ka summary aur analysis do';
+    addMsg('user',`📎 ${file.name} — ${up}`); attachedFile=null;
+    document.getElementById('attach-area').innerHTML='';
+    addLoading(); setUI(true); checkRateLimit();
+    try{
+      const fd=new FormData(); fd.append('file',file);
+      const res=await fetch(`${API}/analyze-file?key=${encodeURIComponent(key)}&prompt=${encodeURIComponent(up)}`,{method:'POST',mode:'cors',body:fd});
+      const data=await res.json(); rmLoading();
+      addMsg('ai', data.error?`⚠️ ${data.error}`:data.reply||'No response.');
+    }catch(e){rmLoading();addMsg('ai',`❌ Network error: ${e.message}`);}
+    finally{setUI(false);document.getElementById('ui').focus();}
+    return;
+  }
+
+  // Image analysis
+  if(attachedFile&&attachedFile.type==='image'){
+    const file=attachedFile.file; const up=prompt||'Is image mein kya hai?';
+    addMsg('user',`📷 ${up}`);
+    const box=document.getElementById('chat-box');
+    const lastMsg=box.lastElementChild;
+    if(lastMsg&&attachedFile.preview){const bub=lastMsg.querySelector('.bubble');if(bub){const img=document.createElement('img');img.src=attachedFile.preview;img.style.cssText='max-width:150px;border-radius:8px;margin-top:6px;display:block;';bub.appendChild(img);}}
+    attachedFile=null; document.getElementById('attach-area').innerHTML='';
+    addLoading(); setUI(true); checkRateLimit();
+    try{
+      const fd=new FormData(); fd.append('file',file);
+      const res=await fetch(`${API}/analyze-image?key=${encodeURIComponent(key)}&prompt=${encodeURIComponent(up)}`,{method:'POST',mode:'cors',body:fd});
+      const data=await res.json(); rmLoading();
+      addMsg('ai', data.error?`⚠️ ${data.error}`:data.reply||'No response.');
+    }catch(e){rmLoading();addMsg('ai',`❌ Network error: ${e.message}`);}
+    finally{setUI(false);document.getElementById('ui').focus();}
+    return;
+  }
+
+  if(!prompt) return;
+
+  // Auto URL detect
+  const urlRx=/https?:\/\/[^\s]+/;
+  if(urlRx.test(prompt)){
+    const link=prompt.match(urlRx)[0];
+    addMsg('user',`🔗 ${prompt}`); addLoading(); setUI(true); checkRateLimit();
+    try{
+      const res=await fetch(`${API}/analyze-link?key=${encodeURIComponent(key)}&url=${encodeURIComponent(link)}`,{mode:'cors'});
+      const data=await res.json(); rmLoading();
+      addMsg('ai', data.error?`⚠️ ${data.error}`:data.reply||'No response.');
+    }catch(e){rmLoading();addMsg('ai',`❌ Network error: ${e.message}`);}
+    finally{setUI(false);document.getElementById('ui').focus();}
+    return;
+  }
+
+  // Normal chat with context
+  addMsg('user',prompt); addLoading(); setUI(true); checkRateLimit();
+  try{
+    const contextPrompt = buildContext(prompt);
+    const res=await fetch(`${API}/chat?key=${encodeURIComponent(key)}&prompt=${encodeURIComponent(contextPrompt)}`,{mode:'cors'});
+    const data=await res.json(); rmLoading();
+    addMsg('ai', data.error?`⚠️ ${data.error}`:data.reply||'No response.');
+  }catch(e){rmLoading();addMsg('ai',`❌ Network error: ${e.message}`);}
+  finally{setUI(false);document.getElementById('ui').focus();}
+}
+
+/* ════════════════════════════════════
+   SEND IMAGE
+════════════════════════════════════ */
+function detectImageStyle(prompt){
+  const p = prompt.toLowerCase();
+  if(p.includes('anime') || p.includes('cartoon') || p.includes('manga')) return 'anime style, vibrant colors';
+  if(p.includes('realistic') || p.includes('real') || p.includes('photo')) return 'photorealistic, 4k, detailed';
+  if(p.includes('painting') || p.includes('oil') || p.includes('artwork')) return 'oil painting, artistic';
+  if(p.includes('sketch') || p.includes('pencil') || p.includes('drawing')) return 'pencil sketch, black and white';
+  if(p.includes('3d') || p.includes('render') || p.includes('3d model')) return '3d render, cinema 4d';
+  return imgStyle || ''; // fallback to manually selected style
+}
+
+async function sendImage(){
+  if(!key||busy) return;
+  const prompt=getPrompt(); if(!prompt) return;
+  window._imgMode=false;
+  document.getElementById('ui').placeholder='Message...';
+  const autoStyle = detectImageStyle(prompt);
+  const finalPrompt = autoStyle ? `${prompt}, ${autoStyle}` : prompt;
+  addMsg('user',`🎨 ${prompt}`);
+  addLoading(); setUI(true); checkRateLimit();
+  try{
+    const res=await fetch(`${API}/image?key=${encodeURIComponent(key)}&prompt=${encodeURIComponent(finalPrompt)}`,{mode:'cors'});
+    const data=await res.json(); rmLoading();
+    if(data.error) addMsg('ai',`⚠️ ${data.error}`);
+    else if(data.image_link) addMsg('ai','',true,data.image_link);
+    else addMsg('ai','⚠️ No image returned.');
+  }catch(e){rmLoading();addMsg('ai',`❌ Network error: ${e.message}`);}
+  finally{setUI(false);document.getElementById('ui').focus();}
+}
+
+/* ════════════════════════════════════
+   PLUS MENU
+════════════════════════════════════ */
+let plusOpen = false;
+function togglePlusMenu(){
+  plusOpen = !plusOpen;
+  document.getElementById('plus-menu').classList.toggle('open', plusOpen);
+  document.getElementById('plus-btn').classList.toggle('open', plusOpen);
+  document.getElementById('plus-overlay').classList.toggle('show', plusOpen);
+  if(!plusOpen){ document.getElementById('pm-style-bar').style.display='none'; document.getElementById('pm-tpl-bar').style.display='none'; }
+}
+function closePlusMenu(){
+  plusOpen=false;
+  document.getElementById('plus-menu').classList.remove('open');
+  document.getElementById('plus-btn').classList.remove('open');
+  document.getElementById('plus-overlay').classList.remove('show');
+  document.getElementById('pm-style-bar').style.display='none';
+  document.getElementById('pm-tpl-bar').style.display='none';
+}
+function plusAction(type){
+  switch(type){
+    case 'file':     document.getElementById('file-input').click(); closePlusMenu(); break;
+    case 'photo':    document.getElementById('img-input').click();  closePlusMenu(); break;
+    case 'voice':    closePlusMenu(); toggleVoice(); break;
+    case 'image':
+      closePlusMenu();
+      setTimeout(()=>{
+        document.getElementById('ui').placeholder='Image banao: kya banana hai? (e.g. anime cat, realistic sunset)';
+        document.getElementById('ui').focus();
+        window._imgMode=true;
+      }, 100);
+      break;
+    case 'template': {
+      const b=document.getElementById('pm-tpl-bar');
+      b.style.display=b.style.display==='none'?'block':'none';
+      break;
+    }
+    case 'persona':  closePlusMenu(); openPersona(); break;
+  }
+}
+
+/* Image mode toggle on send */
+window._imgMode = false;
+const _origSendChat2 = window.sendChat;
+
+/* ════════════════════════════════════
+   TEXTAREA
+════════════════════════════════════ */
+const ta=document.getElementById('ui');
+ta.addEventListener('input', function(){
+  this.style.height='auto';
+  this.style.height=Math.min(this.scrollHeight,110)+'px';
+  // reset img mode placeholder on type
+  if(window._imgMode && this.value===''){
+    this.placeholder='Message...'; window._imgMode=false;
+  }
+});
+// Enter to send
+ta.addEventListener('keydown', e=>{
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); if(window._imgMode) sendImage(); else sendChat(); if(navigator.vibrate)navigator.vibrate(25); }
+});
+
+function haptic(){ if(navigator.vibrate) navigator.vibrate(25); }
+
+// Enter to send
+ta.addEventListener('keydown', e=>{
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); if(window._imgMode) sendImage(); else sendChat(); haptic(); }
+});
+
+// Send button click - check img mode
+document.getElementById('btn-chat').addEventListener('click', ()=>{
+  if(window._imgMode){ sendImage(); window._imgMode=false; document.getElementById('ui').placeholder='Message...'; }
+  haptic();
+});
+
+// Load stats on ready
+setTimeout(()=>{ try{ loadStats(); }catch(e){} }, 400);
+
+/* ════════════════════════════════════
+   USAGE STATS
+════════════════════════════════════ */
+let stats = {msgs:0, imgs:0, words:0};
+function loadStats(){
+  try{ const s=JSON.parse(localStorage.getItem('nx_stats')||'{}'); stats={msgs:s.msgs||0,imgs:s.imgs||0,words:s.words||0}; }catch(e){}
+  updateStatsUI();
+}
+function saveStats(){ try{localStorage.setItem('nx_stats',JSON.stringify(stats));}catch(e){} }
+function trackMsg(){ stats.msgs++; saveStats(); updateStatsUI(); }
+function trackImg(){ stats.imgs++; saveStats(); updateStatsUI(); }
+function trackWords(text){ stats.words += (text||'').split(/\s+/).filter(Boolean).length; saveStats(); }
+function updateStatsUI(){
+  document.getElementById('stats-msg-count').textContent = stats.msgs;
+  document.getElementById('st-msgs').textContent = stats.msgs;
+  document.getElementById('st-imgs').textContent = stats.imgs;
+  document.getElementById('st-sessions').textContent = sessions.length||0;
+  document.getElementById('st-words').textContent = stats.words;
+}
+function openStats(){ loadStats(); document.getElementById('stats-modal').style.display='block'; }
+function closeStats(e){ if(!e||e.target===document.querySelector('#stats-modal .modal-overlay')){ document.getElementById('stats-modal').style.display='none'; } }
+
+/* ════════════════════════════════════
+   TYPEWRITER EFFECT
+════════════════════════════════════ */
+function typewriterMsg(role, fullText){
+  removeEmpty();
+  const box=document.getElementById('chat-box');
+  const wrap=document.createElement('div'); wrap.className=`msg ${role}`;
+  const av=document.createElement('div'); av.className='av'; av.textContent='AI';
+  const col=document.createElement('div'); col.className='mcol';
+  const bub=document.createElement('div'); bub.className='bubble';
+  const md=document.createElement('div'); md.className='mdb typing-cursor';
+  bub.appendChild(md);
+  const ts=document.createElement('div'); ts.className='ts'; ts.textContent=tstamp();
+  col.appendChild(bub); col.appendChild(ts);
+  wrap.appendChild(av); wrap.appendChild(col);
+  box.appendChild(wrap);
+
+  let i=0; const speed=12;
+  const words = fullText.split(' ');
+  let built='';
+  const interval = setInterval(()=>{
+    if(i>=words.length){
+      clearInterval(interval);
+      md.classList.remove('typing-cursor');
+      md.innerHTML = marked.parse(fullText);
+      // Add reaction + action bar after typewriter done
+      addReactBar(col, fullText);
+      addMsgActions(col, fullText);
+      box.scrollTop=box.scrollHeight;
+      chatHistory.push({role:'assistant',content:fullText});
+      saveCurrentSession();
+      trackWords(fullText);
+      return;
+    }
+    built += (i===0?'':' ') + words[i];
+    md.innerHTML = marked.parse(built + ' ▋');
+    i++;
+    box.scrollTop=box.scrollHeight;
+  }, speed);
+  return wrap;
+}
+
+/* ════════════════════════════════════
+   REACTIONS
+════════════════════════════════════ */
+function addReactBar(col, text){
+  const bar=document.createElement('div'); bar.className='react-bar';
+  const reactions=[{e:'👍',k:'like'},{e:'❤️',k:'love'},{e:'🔥',k:'fire'},{e:'😮',k:'wow'}];
+  reactions.forEach(r=>{
+    const btn=document.createElement('button'); btn.className='react-btn';
+    btn.innerHTML=r.e; btn.title=r.k;
+    btn.onclick=()=>{
+      if(btn.classList.contains('reacted')){ btn.classList.remove('reacted'); if(navigator.vibrate)navigator.vibrate(10); return; }
+      btn.classList.add('reacted');
+      if(navigator.vibrate)navigator.vibrate(20);
+      showToast(r.e+' Reaction added!');
+    };
+    bar.appendChild(btn);
+  });
+  col.appendChild(bar);
+}
+
+function addMsgActions(col, text){
+  const actions=document.createElement('div'); actions.className='msg-actions';
+  const copyBtn=document.createElement('button'); copyBtn.className='ma-btn';
+  copyBtn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy`;
+  copyBtn.onclick=()=>{ navigator.clipboard.writeText(text).then(()=>showToast('✅ Copied!')); };
+  const ttsBtn=document.createElement('button'); ttsBtn.className='tts-btn';
+  ttsBtn.innerHTML=`<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>Listen`;
+  ttsBtn.onclick=()=>speakText(text,ttsBtn);
+  actions.appendChild(copyBtn); actions.appendChild(ttsBtn);
+  col.appendChild(actions);
+}
+
+/* ════════════════════════════════════
+   PROMPT TEMPLATES
+════════════════════════════════════ */
+function useTpl(prefix){
+  const ta=document.getElementById('ui');
+  ta.value = prefix + (ta.value||'');
+  ta.focus(); autoResize(); closePlusMenu();
+}
+
+/* ════════════════════════════════════
+   PATCH sendChat + sendImage to use typewriter + stats
+════════════════════════════════════ */
+const _origSendChat = sendChat;
+// Monkey-patch addMsg for AI messages to use typewriter
+const _origAddMsg = addMsg;
+window._useTypewriter = true;
+
+// Override addMsg to use typewriter for AI text messages
+window.addMsg = function(role, text, isImg=false, imgSrc='', replay=false){
+  if(role==='ai' && !isImg && !replay && window._useTypewriter && text && !text.startsWith('⚠️') && !text.startsWith('❌')){
+    typewriterMsg('ai', text);
+    trackMsg();
+    return;
+  }
+  if(role==='user' && !replay){ trackMsg(); }
+  if(role==='ai' && isImg){ trackImg(); }
+  _origAddMsg(role, text, isImg, imgSrc, replay);
+};
+
+// Load stats on ready
+setTimeout(()=>{ loadStats(); }, 300);
+</script>
+</body>
+</html>
